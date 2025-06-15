@@ -1,4 +1,4 @@
-const API_URL = "https://your-backend-url.com/api"; // ← ЗАМЕНИ на свой backend!
+const API_URL = "https://quiztime-app.onrender.com"; // ← ЗАМЕНИ на свой backend!
 
 export async function getQuestions() {
   try {
@@ -32,3 +32,4 @@ export async function checkSubscription(telegramId) {
     return false;
   }
 }
+
