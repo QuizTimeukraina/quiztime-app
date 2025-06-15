@@ -1,4 +1,4 @@
-const API_URL = "https://quiztime-app.onrender.com"; // ← ЗАМЕНИ на свой backend!
+const API_URL = "https://quiztime-backend.onrender.com"; // ← ЗАМЕНИ на свой backend!
 
 export async function getQuestions() {
   try {
