@@ -1,88 +1,103 @@
-// game.js
-
-const API_URL = 'https://quiztime-backend.onrender.com'; // 🟢 Замени, если нужно
 const tg = window.Telegram.WebApp;
-const telegramId = localStorage.getItem("telegramId");
+tg.ready();
 
-let currentQuestion = null;
+let score = 0;
+let currentQuestion = 0;
+let questions = [];
+let timer;
+let timeLeft = 30;
+let answered = false;
 
-async function getQuestion() {
+const scoreDisplay = document.getElementById("score");
+const timerDisplay = document.getElementById("timer");
+const questionEl = document.getElementById("question");
+const answersEl = document.getElementById("answers");
+const nextBtn = document.getElementById("nextBtn");
+const questionCounter = document.getElementById("questionCounter");
+
+async function fetchQuestions() {
   try {
-    const res = await fetch(`${API_URL}/question?telegramId=${telegramId}`);
-    const data = await res.json();
+    const res = await fetch('https://quiztime-backend.onrender.com/questions');
+    questions = await res.json();
+    showQuestion();
+  } catch (error) {
+    questionEl.textContent = "❌ Не вдалося завантажити питання!";
+    console.error(error);
+  }
+}
 
-    if (!data || !data.question) {
-      document.getElementById("question").innerText = "Питання закінчились!";
-      document.getElementById("answers").innerHTML = "";
-      document.getElementById("nextBtn").style.display = "none";
-      return;
+function startTimer() {
+  timeLeft = 30;
+  timerDisplay.textContent = `⏳ ${timeLeft}`;
+  timer = setInterval(() => {
+    timeLeft--;
+    timerDisplay.textContent = `⏳ ${timeLeft}`;
+    if (timeLeft === 0) {
+      clearInterval(timer);
+      showCorrectAnswer();
     }
-
-    currentQuestion = data;
-    showQuestion(data);
-  } catch (err) {
-    document.getElementById("question").innerText = "Помилка завантаження питання.";
-    console.error(err);
-  }
+  }, 1000);
 }
 
-function showQuestion(q) {
-  document.getElementById("question").innerText = q.question;
+function showQuestion() {
+  answered = false;
+  answersEl.innerHTML = "";
 
-  const answersBox = document.getElementById("answers");
-  answersBox.innerHTML = "";
+  const q = questions[currentQuestion];
+  questionEl.textContent = q.question;
+  questionCounter.textContent = `🧩 Питання: ${currentQuestion + 1}`;
 
-  q.answers.forEach((ans, index) => {
+  q.answers.forEach((ans, i) => {
     const btn = document.createElement("button");
-    btn.innerText = ans;
     btn.className = "answer-btn";
-    btn.addEventListener("click", () => submitAnswer(index));
-    answersBox.appendChild(btn);
+    btn.textContent = ans;
+    btn.onclick = () => selectAnswer(i);
+    answersEl.appendChild(btn);
   });
 
-  document.getElementById("nextBtn").style.display = "none";
+  startTimer();
 }
 
-async function submitAnswer(answerIndex) {
-  try {
-    const res = await fetch(`${API_URL}/answer`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        telegramId,
-        questionId: currentQuestion._id,
-        answerIndex
-      })
-    });
+function selectAnswer(index) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timer);
 
-    const result = await res.json();
-    const allBtns = document.querySelectorAll(".answer-btn");
+  const correct = questions[currentQuestion].correct;
+  const btns = document.querySelectorAll(".answer-btn");
 
-    allBtns.forEach((btn, idx) => {
-      if (idx === currentQuestion.correctIndex) {
-        btn.style.backgroundColor = "green";
-      } else if (idx === answerIndex) {
-        btn.style.backgroundColor = "red";
-      } else {
-        btn.style.opacity = 0.5;
-      }
-      btn.disabled = true;
-    });
+  btns.forEach((btn, i) => {
+    if (i === correct) btn.classList.add("correct");
+    else btn.classList.add("wrong");
+    btn.disabled = true;
+  });
 
-    document.getElementById("nextBtn").style.display = "block";
-
-  } catch (err) {
-    alert("Помилка надсилання відповіді.");
-    console.error(err);
+  if (index === correct) {
+    const points = timeLeft; // Чим швидше — тим більше
+    score += points;
+    scoreDisplay.textContent = `💰 Монети: ${score}`;
   }
+
+  nextBtn.style.display = "block";
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  getQuestion();
+function showCorrectAnswer() {
+  selectAnswer(-1);
+}
 
-  document.getElementById("nextBtn").addEventListener("click", () => {
-    getQuestion();
-  });
+nextBtn.addEventListener("click", () => {
+  currentQuestion++;
+  if (currentQuestion < questions.length) {
+    nextBtn.style.display = "none";
+    showQuestion();
+  } else {
+    questionEl.textContent = "🎉 Гру завершено!";
+    answersEl.innerHTML = "";
+    timerDisplay.textContent = "";
+    nextBtn.style.display = "none";
+    questionCounter.textContent = "";
+  }
 });
+
+// Старт: загружаем вопросы
+fetchQuestions();

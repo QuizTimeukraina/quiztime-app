@@ -1,62 +1,52 @@
-/* Общие стили */
 body {
   margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #121212;
-  color: #fff;
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+  color: white;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
 }
 
-/* Контейнер по центру */
-.container {
-  text-align: center;
-  padding: 20px;
-  max-width: 400px;
-  width: 90%;
-}
-
-/* Логотип */
-.logo {
-  width: 100px;
-  height: 100px;
-  margin-bottom: 20px;
-}
-
-/* Название игры */
-.title {
-  font-size: 2.5rem;
-  font-weight: bold;
-  margin-bottom: 30px;
-}
-
-/* Кнопки */
 button {
-  display: block;
-  width: 100%;
-  padding: 15px;
+  padding: 12px 20px;
   margin: 10px 0;
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 18px;
+  border-radius: 8px;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #00c6ff, #0072ff);
-  color: #fff;
   cursor: pointer;
-  transition: transform 0.2s, background 0.3s;
+  background-color: #00bcd4;
+  color: white;
+  transition: 0.3s;
 }
 
 button:hover {
-  transform: scale(1.03);
-  background: linear-gradient(135deg, #0072ff, #00c6ff);
+  background-color: #008c9e;
 }
 
-/* Текст внизу */
-.footer {
-  font-size: 0.9rem;
-  color: #aaa;
-  margin-top: 25px;
+.main-container, .game-container {
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+#question {
+  margin: 20px 0;
+  font-size: 20px;
+}
+
+.answer-btn {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  background-color: #3949ab;
+}
+
+.answer-btn.correct {
+  background-color: #4caf50;
+}
+
+.answer-btn.wrong {
+  background-color: #f44336;
 }
