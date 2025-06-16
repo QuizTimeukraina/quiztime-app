@@ -1,36 +1,28 @@
-// ✅ Получаем объект Telegram WebApp
 const tg = window.Telegram.WebApp;
 
-// 👤 Пользователь Telegram
 let user = null;
 
-// ▶️ Когда всё загрузится
 window.addEventListener("DOMContentLoaded", () => {
   tg.ready();
-  tg.expand(); // Разворачивает WebApp на весь экран
+  tg.expand();
 
-  user = tg.initDataUnsafe.user;
+  user = tg.initDataUnsafe?.user;
 
-  // Пример — сохранить Telegram ID
   localStorage.setItem("telegramId", user?.id || "");
 
-  // Кнопка "Почати гру"
-  document.getElementById("startBtn").addEventListener("click", () => {
+  document.getElementById("startBtn")?.addEventListener("click", () => {
     window.location.href = "game.html";
   });
 
-  // Кнопка "Рейтинг"
-  document.getElementById("ratingBtn").addEventListener("click", () => {
+  document.getElementById("ratingBtn")?.addEventListener("click", () => {
     alert("Рейтинг буде доступний незабаром!");
   });
 
-  // Кнопка "Призи"
-  document.getElementById("prizesBtn").addEventListener("click", () => {
+  document.getElementById("prizesBtn")?.addEventListener("click", () => {
     alert("1 місце — 40 000 грн\n2 місце — 10 000 грн\n3 місце — 2 500 грн");
   });
 
-  // Кнопка "Поділитися"
-  document.getElementById("shareBtn").addEventListener("click", () => {
-    tg.shareGame(); // Вбудована функція Telegram
+  document.getElementById("shareBtn")?.addEventListener("click", () => {
+    tg.shareGame();
   });
 });
