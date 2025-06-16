@@ -1,28 +1,21 @@
+<!-- game.html -->
 <!DOCTYPE html>
 <html lang="uk">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Гра — QuizTime</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuizTime — Гра</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="game.js" defer></script>
 </head>
 <body>
   <div class="container">
-    <div id="score">Очки: 0</div>
-    <div id="timer">⏳ 30</div>
-    <div id="question">Питання завантажується...</div>
-
-    <div id="answers">
-      <button class="answer-btn">Варіант 1</button>
-      <button class="answer-btn">Варіант 2</button>
-      <button class="answer-btn">Варіант 3</button>
-      <button class="answer-btn">Варіант 4</button>
+    <h1>Гра розпочалася!</h1>
+    <div id="question-box">
+      <p id="question">Завантаження питання...</p>
     </div>
-
-    <button id="nextBtn" style="display:none;">Далі</button>
+    <div id="answers"></div>
+    <button id="nextBtn" style="display: none;">Наступне питання</button>
   </div>
-
-  <script type="module" src="../src/game.js"></script>
 </body>
 </html>

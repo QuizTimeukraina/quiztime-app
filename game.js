@@ -1,100 +1,88 @@
-import { getQuestions, sendResult } from "./api.js";
+// game.js
 
-let questions = [];
-let currentIndex = 0;
-let score = 0;
-let timer;
-let timeLeft = 30;
-let answered = false;
-
+const API_URL = 'https://quiztime-backend.onrender.com'; // 🟢 Замени, если нужно
+const tg = window.Telegram.WebApp;
 const telegramId = localStorage.getItem("telegramId");
 
-const scoreEl = document.getElementById("score");
-const timerEl = document.getElementById("timer");
-const questionEl = document.getElementById("question");
-const answersEl = document.getElementById("answers");
-const nextBtn = document.getElementById("nextBtn");
+let currentQuestion = null;
 
-async function startGame() {
-  questions = await getQuestions();
-  currentIndex = 0;
-  score = 0;
-  showQuestion();
-}
+async function getQuestion() {
+  try {
+    const res = await fetch(`${API_URL}/question?telegramId=${telegramId}`);
+    const data = await res.json();
 
-function showQuestion() {
-  answered = false;
-  timeLeft = 30;
-  nextBtn.style.display = "none";
-
-  const q = questions[currentIndex];
-  questionEl.textContent = q.question;
-
-  // Перемешиваем ответы
-  const shuffled = [...q.answers].sort(() => 0.5 - Math.random());
-  const buttons = answersEl.querySelectorAll(".answer-btn");
-
-  shuffled.forEach((text, i) => {
-    buttons[i].textContent = text;
-    buttons[i].disabled = false;
-    buttons[i].classList.remove("correct", "wrong");
-    buttons[i].onclick = () => handleAnswer(text, q.correct);
-  });
-
-  startTimer();
-}
-
-function startTimer() {
-  timerEl.textContent = `⏳ ${timeLeft}`;
-  timer = setInterval(() => {
-    timeLeft--;
-    timerEl.textContent = `⏳ ${timeLeft}`;
-
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      showNext();
+    if (!data || !data.question) {
+      document.getElementById("question").innerText = "Питання закінчились!";
+      document.getElementById("answers").innerHTML = "";
+      document.getElementById("nextBtn").style.display = "none";
+      return;
     }
-  }, 1000);
+
+    currentQuestion = data;
+    showQuestion(data);
+  } catch (err) {
+    document.getElementById("question").innerText = "Помилка завантаження питання.";
+    console.error(err);
+  }
 }
 
-function handleAnswer(selected, correct) {
-  if (answered) return;
-  answered = true;
-  clearInterval(timer);
+function showQuestion(q) {
+  document.getElementById("question").innerText = q.question;
 
-  const buttons = answersEl.querySelectorAll(".answer-btn");
-  buttons.forEach((btn) => {
-    btn.disabled = true;
-    if (btn.textContent === correct) btn.classList.add("correct");
-    if (btn.textContent === selected && selected !== correct)
-      btn.classList.add("wrong");
+  const answersBox = document.getElementById("answers");
+  answersBox.innerHTML = "";
+
+  q.answers.forEach((ans, index) => {
+    const btn = document.createElement("button");
+    btn.innerText = ans;
+    btn.className = "answer-btn";
+    btn.addEventListener("click", () => submitAnswer(index));
+    answersBox.appendChild(btn);
   });
 
-  // Больше очков за быстрый ответ
-  if (selected === correct) {
-    const points = timeLeft >= 25 ? 10 : timeLeft >= 15 ? 7 : 5;
-    score += points;
-    scoreEl.textContent = `Очки: ${score}`;
-  }
-
-  nextBtn.style.display = "block";
+  document.getElementById("nextBtn").style.display = "none";
 }
 
-nextBtn.addEventListener("click", showNext);
+async function submitAnswer(answerIndex) {
+  try {
+    const res = await fetch(`${API_URL}/answer`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        telegramId,
+        questionId: currentQuestion._id,
+        answerIndex
+      })
+    });
 
-async function showNext() {
-  currentIndex++;
-  if (currentIndex < questions.length) {
-    showQuestion();
-  } else {
-    questionEl.textContent = "Гру завершено!";
-    answersEl.innerHTML = "";
-    timerEl.style.display = "none";
-    nextBtn.style.display = "none";
+    const result = await res.json();
+    const allBtns = document.querySelectorAll(".answer-btn");
 
-    await sendResult(telegramId, score);
-    alert(`Твій результат: ${score} очок`);
+    allBtns.forEach((btn, idx) => {
+      if (idx === currentQuestion.correctIndex) {
+        btn.style.backgroundColor = "green";
+      } else if (idx === answerIndex) {
+        btn.style.backgroundColor = "red";
+      } else {
+        btn.style.opacity = 0.5;
+      }
+      btn.disabled = true;
+    });
+
+    document.getElementById("nextBtn").style.display = "block";
+
+  } catch (err) {
+    alert("Помилка надсилання відповіді.");
+    console.error(err);
   }
 }
 
-startGame();
+document.addEventListener("DOMContentLoaded", () => {
+  getQuestion();
+
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    getQuestion();
+  });
+});
