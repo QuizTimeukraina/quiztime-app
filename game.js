@@ -1,36 +1,21 @@
-const tg = window.Telegram.WebApp;
-tg.ready();
+import questions from './questions.js';
+
+let category = localStorage.getItem("category") || "fun";
+let filtered = questions.filter(q => q.category === category);
+let used = [];
 
 let score = 0;
 let currentQuestion = 0;
 let timer;
 let timeLeft = 30;
 let answered = false;
-let questions = [];
 
 const scoreDisplay = document.getElementById("score");
 const timerDisplay = document.getElementById("timer");
 const questionEl = document.getElementById("question");
 const answersEl = document.getElementById("answers");
 const nextBtn = document.getElementById("nextBtn");
-const backBtn = document.getElementById("backBtn");
 const questionCounter = document.getElementById("questionCounter");
-
-async function fetchQuestions() {
-  const category = localStorage.getItem("category") || "random";
-  try {
-    const res = await fetch(`https://quiztime-backend.onrender.com/api/questions?category=${category}`);
-    const data = await res.json();
-    questions = data;
-    showQuestion();
-  } catch (err) {
-    questionEl.textContent = "❌ Не вдалося завантажити питання.";
-    backBtn.style.display = "block";
-    backBtn.onclick = () => {
-      window.location.href = "index.html";
-    };
-  }
-}
 
 function startTimer() {
   timeLeft = 30;
@@ -46,30 +31,39 @@ function startTimer() {
 }
 
 function showQuestion() {
+  if (filtered.length === 0) {
+    questionEl.textContent = "🙈 Питань більше немає!";
+    answersEl.innerHTML = "";
+    timerDisplay.textContent = "";
+    questionCounter.textContent = "";
+    nextBtn.style.display = "none";
+    return;
+  }
+
   answered = false;
   answersEl.innerHTML = "";
-  const q = questions[currentQuestion];
-  questionEl.textContent = q.question;
-  questionCounter.textContent = `🧩 Питання: ${currentQuestion + 1}`;
+  const q = filtered.splice(Math.floor(Math.random() * filtered.length), 1)[0];
+  used.push(q);
 
+  questionEl.textContent = q.question;
+  questionCounter.textContent = `🧩 Питання: ${used.length}`;
   q.answers.forEach((ans, i) => {
     const btn = document.createElement("button");
     btn.className = "answer-btn";
     btn.textContent = ans;
-    btn.onclick = () => selectAnswer(i);
+    btn.onclick = () => selectAnswer(i, q.correct);
     answersEl.appendChild(btn);
   });
 
   startTimer();
 }
 
-function selectAnswer(index) {
+function selectAnswer(index, correct) {
   if (answered) return;
   answered = true;
   clearInterval(timer);
-  const correct = questions[currentQuestion].correct;
-  const btns = document.querySelectorAll(".answer-btn");
 
+  const btns = document.querySelectorAll(".answer-btn");
   btns.forEach((btn, i) => {
     if (i === correct) btn.classList.add("correct");
     else btn.classList.add("wrong");
@@ -80,27 +74,19 @@ function selectAnswer(index) {
     const points = timeLeft;
     score += points;
     scoreDisplay.textContent = `💰 Монети: ${score}`;
+    localStorage.setItem("coins", score);
   }
 
   nextBtn.style.display = "block";
 }
 
 function showCorrectAnswer() {
-  selectAnswer(-1);
+  selectAnswer(-1, used.at(-1).correct);
 }
 
 nextBtn.addEventListener("click", () => {
-  currentQuestion++;
-  if (currentQuestion < questions.length) {
-    nextBtn.style.display = "none";
-    showQuestion();
-  } else {
-    questionEl.textContent = `🎉 Гру завершено!\nВаш результат: ${score} монет`;
-    answersEl.innerHTML = "";
-    timerDisplay.textContent = "";
-    nextBtn.style.display = "none";
-    questionCounter.textContent = "";
-  }
+  nextBtn.style.display = "none";
+  showQuestion();
 });
 
-fetchQuestions();
+showQuestion();
