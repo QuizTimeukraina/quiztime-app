@@ -3,26 +3,32 @@ tg.ready();
 
 let score = 0;
 let currentQuestion = 0;
-let questions = [];
 let timer;
 let timeLeft = 30;
 let answered = false;
+let questions = [];
 
 const scoreDisplay = document.getElementById("score");
 const timerDisplay = document.getElementById("timer");
 const questionEl = document.getElementById("question");
 const answersEl = document.getElementById("answers");
 const nextBtn = document.getElementById("nextBtn");
+const backBtn = document.getElementById("backBtn");
 const questionCounter = document.getElementById("questionCounter");
 
 async function fetchQuestions() {
+  const category = localStorage.getItem("category") || "random";
   try {
-    const res = await fetch('https://quiztime-backend.onrender.com/questions');
-    questions = await res.json();
+    const res = await fetch(`https://quiztime-backend.onrender.com/api/questions?category=${category}`);
+    const data = await res.json();
+    questions = data;
     showQuestion();
-  } catch (error) {
-    questionEl.textContent = "❌ Не вдалося завантажити питання!";
-    console.error(error);
+  } catch (err) {
+    questionEl.textContent = "❌ Не вдалося завантажити питання.";
+    backBtn.style.display = "block";
+    backBtn.onclick = () => {
+      window.location.href = "index.html";
+    };
   }
 }
 
@@ -42,7 +48,6 @@ function startTimer() {
 function showQuestion() {
   answered = false;
   answersEl.innerHTML = "";
-
   const q = questions[currentQuestion];
   questionEl.textContent = q.question;
   questionCounter.textContent = `🧩 Питання: ${currentQuestion + 1}`;
@@ -62,7 +67,6 @@ function selectAnswer(index) {
   if (answered) return;
   answered = true;
   clearInterval(timer);
-
   const correct = questions[currentQuestion].correct;
   const btns = document.querySelectorAll(".answer-btn");
 
@@ -73,7 +77,7 @@ function selectAnswer(index) {
   });
 
   if (index === correct) {
-    const points = timeLeft; // Чим швидше — тим більше
+    const points = timeLeft;
     score += points;
     scoreDisplay.textContent = `💰 Монети: ${score}`;
   }
@@ -91,7 +95,7 @@ nextBtn.addEventListener("click", () => {
     nextBtn.style.display = "none";
     showQuestion();
   } else {
-    questionEl.textContent = "🎉 Гру завершено!";
+    questionEl.textContent = `🎉 Гру завершено!\nВаш результат: ${score} монет`;
     answersEl.innerHTML = "";
     timerDisplay.textContent = "";
     nextBtn.style.display = "none";
@@ -99,5 +103,4 @@ nextBtn.addEventListener("click", () => {
   }
 });
 
-// Старт: загружаем вопросы
 fetchQuestions();

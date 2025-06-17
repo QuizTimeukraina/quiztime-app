@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Вибір категорії</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Оберіть категорію:</h2>
+    <div id="categories">
+      <button data-category="history">📜 Історія</button>
+      <button data-category="science">🔬 Наука</button>
+      <button data-category="sport">⚽ Спорт</button>
+      <button data-category="geography">🌍 Географія</button>
+      <button data-category="random">🎲 Випадкові</button>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll("#categories button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const category = btn.dataset.category;
+        localStorage.setItem("category", category);
+        window.location.href = "game.html";
+      });
+    });
+  </script>
+</body>
+</html>

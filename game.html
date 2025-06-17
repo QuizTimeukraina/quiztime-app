@@ -5,18 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Гра — QuizTime</title>
   <link rel="stylesheet" href="styles.css" />
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <div class="game-container">
+  <div class="container">
     <div id="score">💰 Монети: 0</div>
     <div id="timer">⏳ 30</div>
     <div id="questionCounter">🧩 Питання: 1</div>
     <div id="question">Питання завантажується...</div>
-
     <div id="answers"></div>
-
-    <button id="nextBtn" style="display:none;">Далі</button>
+    <button id="nextBtn" style="display:none;">➡️ Далі</button>
+    <button id="backBtn" style="display:none;">🔙 На головну</button>
   </div>
 
   <script type="module" src="./game.js"></script>

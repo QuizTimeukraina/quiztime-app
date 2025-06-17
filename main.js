@@ -1,23 +1,27 @@
 const tg = window.Telegram.WebApp;
-tg.ready();
-tg.expand();
 
-document.getElementById("startBtn").addEventListener("click", () => {
-  window.location.href = "game.html";
-});
+let user = null;
 
-document.getElementById("ratingBtn").addEventListener("click", () => {
-  alert("Рейтинг буде доступний найближчим часом!");
-});
+window.addEventListener("DOMContentLoaded", () => {
+  tg.ready();
+  tg.expand();
 
-document.getElementById("prizesBtn").addEventListener("click", () => {
-  alert("🎁 Призи:\n\n1 місце — 40 000 грн\n2 місце — 10 000 грн\n3 місце — 2 500 грн\n\nУмови: Грайте кожного дня, набирайте більше монет, та входьте в топ 3 гравців!");
-});
+  user = tg.initDataUnsafe?.user || null;
+  localStorage.setItem("telegramId", user?.id || "");
 
-document.getElementById("shareBtn").addEventListener("click", () => {
-  if (tg.shareGame) {
+  document.getElementById("startBtn").addEventListener("click", () => {
+    window.location.href = "category.html";
+  });
+
+  document.getElementById("ratingBtn").addEventListener("click", () => {
+    alert("📊 Рейтинг буде доступний найближчим часом.");
+  });
+
+  document.getElementById("prizesBtn").addEventListener("click", () => {
+    alert("🎁 Призи:\n1 місце — 40 000 грн\n2 місце — 10 000 грн\n3 місце — 2 500 грн\n\nЩоб виграти — грай, заробляй монети та займай топове місце у рейтингу.");
+  });
+
+  document.getElementById("shareBtn").addEventListener("click", () => {
     tg.shareGame();
-  } else {
-    alert("Поділитися можна лише через Telegram");
-  }
+  });
 });
